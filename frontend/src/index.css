@@ -1,0 +1,199 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@theme {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-secondary-50: #fff7ed;
+  --color-secondary-100: #ffedd5;
+  --color-secondary-500: #f97316;
+  --color-secondary-600: #ea580c;
+}
+
+/* ベーススタイル */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* アニメーション設定 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* prefers-reduced-motionに配慮 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* レイアウト修正：ヘッダーの高さを考慮したページ構成 */
+.page-content {
+  padding-top: 5rem; /* ヘッダーの高さ（80px）+ 余白 */
+  min-height: calc(100vh - 5rem);
+}
+
+/* カスタムコンポーネントクラス */
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+}
+
+.input-field {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+}
+
+/* コンテナクラス - より良い中央配置とスペーシング */
+.container-custom {
+  @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
+}
+
+.container-narrow {
+  @apply max-w-4xl mx-auto px-6 sm:px-8 lg:px-12;
+}
+
+/* セクションスペーシング改善 */
+.section-padding {
+  @apply py-24 sm:py-32;
+}
+
+.section-padding-small {
+  @apply py-16 sm:py-20;
+}
+
+/* テキストクランプ */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* フェードインアニメーション */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.fade-in-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.fade-in-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.fade-in-delay-3 {
+  animation-delay: 0.3s;
+}
+
+/* スライドアップアニメーション */
+.slide-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+.slide-up-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.slide-up-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.slide-up-delay-3 {
+  animation-delay: 0.3s;
+}
+
+/* ズームインアニメーション */
+.zoom-in {
+  opacity: 0;
+  transform: scale(0.9);
+  animation: zoomIn 0.6s ease-out forwards;
+}
+
+/* フローティングアニメーション */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+/* パルスアニメーション（CTA用） */
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* キーフレーム定義 */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
+  }
+}

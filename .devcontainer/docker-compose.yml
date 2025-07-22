@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - ~/.aws:/home/vscode/.aws:ro
+    environment:
+      - NODE_ENV=development
+      - PYTHONPATH=/workspace/backend
+      - AWS_PROFILE=default
+    ports:
+      - "3000:3000"  # Vite dev server
+      - "8000:8000"  # FastAPI dev server
+    depends_on:
+      - mysql
+    command: sleep infinity
+    user: vscode
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: makeoo_dev
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: devpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command: >
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+
+volumes:
+  mysql-data: 

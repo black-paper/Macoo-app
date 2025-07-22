@@ -1,0 +1,47 @@
+{
+  "recommendations": [
+    // Python開発
+    "ms-python.python",
+    "ms-python.flake8",
+    "ms-python.black-formatter",
+    "ms-python.pylint",
+    "ms-toolsai.jupyter",
+    
+    // TypeScript/JavaScript
+    "ms-vscode.vscode-typescript-next",
+    
+    // React/Frontend
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-json",
+    
+    // AWS
+    "amazonwebservices.aws-toolkit-vscode",
+    
+    // YAML/設定ファイル
+    "redhat.vscode-yaml",
+    
+    // Git
+    "github.vscode-pull-request-github",
+    "github.copilot",
+    
+    // DevOps/Docker
+    "ms-vscode-remote.remote-containers",
+    "ms-azuretools.vscode-docker",
+    
+    // シェル
+    "foxundermoon.shell-format",
+    "timonwong.shellcheck",
+    
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    
+    // その他便利ツール
+    "ms-vsliveshare.vsliveshare",
+    "streetsidesoftware.code-spell-checker",
+    "oderwat.indent-rainbow",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-json",
+    "formulahendry.auto-rename-tag"
+  ]
+} 

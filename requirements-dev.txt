@@ -1,0 +1,50 @@
+# Makeoo バックエンド開発用依存関係
+# DevContainer構築時に事前インストールされるパッケージ
+
+# Web Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# Database
+sqlalchemy>=2.0.21
+alembic>=1.12.1
+pymysql>=1.1.0
+cryptography>=41.0.7  # PyMySQLでSSL接続用
+
+# Authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# AWS
+boto3>=1.29.7
+botocore>=1.32.7
+
+# Data Validation
+pydantic>=2.4.2
+email-validator>=2.1.0
+
+# Development Tools
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+httpx>=0.25.1  # FastAPIテスト用
+
+# Code Quality
+black>=23.9.1
+flake8>=6.1.0
+mypy>=1.6.1
+isort>=5.12.0
+
+# Documentation
+mkdocs>=1.5.3
+mkdocs-material>=9.4.7
+
+# Utilities
+python-dotenv>=1.0.0
+redis>=5.0.1
+celery>=5.3.4  # 非同期タスク用（将来的に）
+
+# Monitoring
+structlog>=23.2.0 
