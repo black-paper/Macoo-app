@@ -1,18 +1,21 @@
+/// <reference types="vitest" />
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: "0.0.0.0",
     port: 5173,
-    strictPort: true,
+    strictPort: true, // ポートを固定化（使用中の場合はエラーを出す）
+    open: true,
   },
-  preview: {
-    host: "0.0.0.0",
-    port: 4173,
-    strictPort: true,
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
+    css: true,
   },
 });

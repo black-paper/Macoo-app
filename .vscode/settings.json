@@ -8,12 +8,12 @@
   "python.linting.flake8Args": ["--max-line-length=88"],
   "python.analysis.autoImportCompletions": true,
   "python.analysis.typeCheckingMode": "basic",
-  
+
   // TypeScript/JavaScript設定
   "typescript.preferences.importModuleSpecifier": "relative",
   "javascript.preferences.importModuleSpecifier": "relative",
   "typescript.suggest.autoImports": true,
-  
+
   // エディタ設定
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
@@ -23,7 +23,7 @@
   "editor.rulers": [88, 120],
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-  
+
   // ファイル除外設定
   "files.exclude": {
     "**/__pycache__": true,
@@ -35,7 +35,7 @@
     "**/.venv": true,
     "**/*.pyc": true
   },
-  
+
   // 検索除外設定
   "search.exclude": {
     "**/node_modules": true,
@@ -45,7 +45,7 @@
     "**/.venv": true,
     "**/logs": true
   },
-  
+
   // ファイル関連付け
   "files.associations": {
     "*.yml": "yaml",
@@ -53,22 +53,36 @@
     "Dockerfile*": "dockerfile",
     ".env*": "dotenv"
   },
-  
+
   // Emmet設定
   "emmet.includeLanguages": {
     "javascript": "javascriptreact",
     "typescript": "typescriptreact"
   },
-  
+
   // ターミナル設定
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.cwd": "/workspace",
-  
+
+  // AWS環境変数をターミナルで自動設定
+  "terminal.integrated.env.linux": {
+    "AWS_PROFILE": "shota",
+    "AWS_REGION": "ap-northeast-1"
+  },
+  "terminal.integrated.env.osx": {
+    "AWS_PROFILE": "shota",
+    "AWS_REGION": "ap-northeast-1"
+  },
+  "terminal.integrated.env.windows": {
+    "AWS_PROFILE": "shota",
+    "AWS_REGION": "ap-northeast-1"
+  },
+
   // Git設定
   "git.autofetch": true,
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
-  
+
   // 拡張機能固有設定
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
@@ -81,7 +95,7 @@
     "tw\\.\\w+`([^`]*)",
     "tw\\(.*?\\)`([^`]*)"
   ],
-  
+
   // Prettier設定
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -104,19 +118,18 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
-  
+
   // テスト設定
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": [
-    "backend/tests"
-  ],
+  "python.testing.pytestArgs": ["backend/tests"],
   "python.testing.unittestEnabled": false,
   "python.testing.nosetestsEnabled": false,
-  
+
   // インテリセンス設定
   "python.analysis.completeFunctionParens": true,
   "typescript.suggest.completeFunctionCalls": true,
-  
+
   // ワークスペース固有のスニペット有効化
-  "editor.snippetSuggestions": "top"
-} 
+  "editor.snippetSuggestions": "top",
+  "cSpell.words": ["Makeoo"]
+}

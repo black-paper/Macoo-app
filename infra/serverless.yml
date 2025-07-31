@@ -1,0 +1,183 @@
+# yamllint disable-file
+# eslint-disable
+# @ts-nocheck
+# CloudFormation intrinsic functions (!Ref, !Sub, !GetAtt) are used in this file
+# These are valid CloudFormation syntax and will work correctly during deployment
+# Linter warnings can be safely ignored for these functions
+service: makeoo-frontend
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  region: ap-northeast-1 # 東京リージョン
+  profile: shota
+  stage: ${opt:stage, 'dev'}
+
+custom:
+  # S3バケット名は CloudFormation で自動生成、デプロイ後に動的設定
+  deployedBucketName: makeoo-frontend-${self:provider.stage}-bucket
+  # CloudFront設定
+  cloudfrontConfig:
+    dev:
+      PriceClass: PriceClass_100 # 最も安価なエッジロケーション
+      TTL: 86400 # 1日
+    prod:
+      PriceClass: PriceClass_100
+      TTL: 31536000 # 1年
+
+  # S3 Sync プラグイン設定 - ビルドファイルをS3にアップロード
+  s3Sync:
+    - bucketName: ${cf:${self:service}-${self:provider.stage}.StaticSiteBucket}
+      localDir: ../frontend/dist
+      acl: public-read
+      followSymlinks: true
+      defaultContentType: text/html
+      params:
+        - match: "*.html"
+          CacheControl: "max-age=0, no-cache, no-store, must-revalidate"
+        - match: "*.js"
+          CacheControl: "max-age=31536000, immutable"
+        - match: "*.css"
+          CacheControl: "max-age=31536000, immutable"
+        - match: "*.png"
+          CacheControl: "max-age=31536000, immutable"
+        - match: "*.jpg"
+          CacheControl: "max-age=31536000, immutable"
+        - match: "*.svg"
+          CacheControl: "max-age=31536000, immutable"
+        - match: "*.ico"
+          CacheControl: "max-age=31536000, immutable"
+
+  # CloudFront キャッシュ無効化設定
+  cloudfrontInvalidate:
+    - distributionIdKey: CloudFrontDistributionId
+      items:
+        - "/*"
+
+resources:
+  Resources:
+    # S3バケット - 静的ウェブサイトホスティング用
+    StaticSiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        # BucketName は自動生成される（指定しない方が安全）
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html # SPAのため、404エラーもindex.htmlにリダイレクト
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: BucketOwnerPreferred
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ["*"]
+              AllowedMethods: [GET, HEAD]
+              AllowedOrigins: ["*"]
+              MaxAge: 3000
+
+    # S3バケットポリシー - パブリック読み取りアクセスを許可
+    StaticSiteBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref StaticSiteBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+
+    # CloudFront Distribution - CDNとHTTPS対応
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Comment: Makeoo Frontend Distribution - ${self:provider.stage}
+          DefaultRootObject: index.html
+          PriceClass: ${self:custom.cloudfrontConfig.${self:provider.stage}.PriceClass}
+
+          # S3をオリジンとして設定
+          Origins:
+            - Id: S3Origin
+              DomainName: !Sub "${StaticSiteBucket}.s3-website-${AWS::Region}.amazonaws.com"
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: http-only
+
+          # デフォルトの動作設定
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            DefaultTTL: 86400
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+
+          # SPA向けエラーページ設定（404を index.html にリダイレクト）
+          CustomErrorResponses:
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+
+          # 安価なエッジロケーションのみ使用
+          Restrictions:
+            GeoRestriction:
+              RestrictionType: none
+
+          # AWS提供の無料SSL証明書を使用
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: true
+
+  Outputs:
+    # デプロイ後に表示される情報
+    S3BucketName:
+      Description: "S3 Bucket Name"
+      Value: !Ref StaticSiteBucket
+      Export:
+        Name: ${self:service}-${self:provider.stage}-bucket-name
+
+    S3BucketWebsiteURL:
+      Description: "S3 Website URL"
+      Value: !Sub "http://${StaticSiteBucket}.s3-website-${AWS::Region}.amazonaws.com"
+      Export:
+        Name: ${self:service}-${self:provider.stage}-s3-url
+
+    CloudFrontDistributionDomainName:
+      Description: "CloudFront Distribution Domain Name"
+      Value: !GetAtt CloudFrontDistribution.DomainName
+      Export:
+        Name: ${self:service}-${self:provider.stage}-cloudfront-domain
+
+    CloudFrontDistributionURL:
+      Description: "CloudFront Distribution URL"
+      Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+      Export:
+        Name: ${self:service}-${self:provider.stage}-cloudfront-url
+
+    CloudFrontDistributionId:
+      Description: "CloudFront Distribution ID"
+      Value: !Ref CloudFrontDistribution
+      Export:
+        Name: ${self:service}-${self:provider.stage}-cloudfront-id
+
+plugins:
+  - serverless-s3-sync
+  - serverless-cloudfront-invalidate

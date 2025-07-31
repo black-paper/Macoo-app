@@ -1,0 +1,28 @@
+{
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/serverless/serverless/main/docs/providers/aws/serverless.schema.json": [
+      "serverless.yml",
+      "serverless.yaml"
+    ]
+  },
+  "yaml.customTags": [
+    "!Ref",
+    "!GetAtt",
+    "!Sub",
+    "!Join",
+    "!ImportValue",
+    "!Select",
+    "!Split",
+    "!Base64",
+    "!Cidr",
+    "!FindInMap",
+    "!GetAZs",
+    "!If",
+    "!Not",
+    "!Equals",
+    "!And",
+    "!Or"
+  ],
+  "yaml.validate": true,
+  "yamllint.configPath": ".yamllint"
+}

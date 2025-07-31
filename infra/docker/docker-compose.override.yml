@@ -1,0 +1,67 @@
+# 開発環境専用設定
+# docker-compose up 時に自動的に適用される
+
+version: "3.8"
+
+services:
+  # 開発環境用のMySQL設定調整
+  mysql:
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --general-log=1
+      - --general-log-file=/var/lib/mysql/general.log
+      - --slow-query-log=1
+      - --slow-query-log-file=/var/lib/mysql/slow.log
+      - --long-query-time=1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: makeoo_dev
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev_password
+
+  # 開発環境用のRedis設定
+  redis:
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+
+  # バックエンド開発用設定
+  backend:
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://dev_user:dev_password@mysql:3306/makeoo_dev
+      DEBUG: "makeoo:*"
+      LOG_LEVEL: debug
+    volumes:
+      - ../../backend:/app
+      - /app/node_modules
+      - ../../logs:/app/logs
+
+  # 開発用データベース管理ツール
+  adminer:
+    image: adminer:4.8.1
+    container_name: makeoo_adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      - mysql
+    networks:
+      - makeoo_network
+
+  # Redis管理ツール
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    container_name: makeoo_redis_commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    depends_on:
+      - redis
+    networks:
+      - makeoo_network

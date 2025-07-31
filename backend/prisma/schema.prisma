@@ -1,0 +1,306 @@
+// Makeoo DIY Platform - Prisma Schema
+// MySQL 8.0対応、完全正規化設計
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =================================
+// 1. ユーザー管理
+// =================================
+
+model User {
+  id           BigInt   @id @default(autoincrement())
+  username     String   @unique @db.VarChar(50)
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  bio          String?  @db.Text
+  avatarUrl    String?  @map("avatar_url") @db.VarChar(500)
+  location     String?  @db.VarChar(100)
+  websiteUrl   String?  @map("website_url") @db.VarChar(500)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  recipes       Recipe[]
+  likes         RecipeLike[]
+  comments      RecipeComment[]
+  commentLikes  CommentLike[]
+  views         RecipeView[]
+
+  @@index([username])
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// =================================
+// 2. カテゴリ・タグ管理
+// =================================
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(50)
+  slug        String   @unique @db.VarChar(50)
+  description String?  @db.Text
+  iconName    String?  @map("icon_name") @db.VarChar(50)
+  colorCode   String   @default("#22c55e") @map("color_code") @db.VarChar(7)
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  recipes Recipe[]
+
+  @@index([slug])
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(30)
+  slug       String   @unique @db.VarChar(30)
+  usageCount Int      @default(0) @map("usage_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  recipes RecipeTag[]
+
+  @@index([slug])
+  @@index([usageCount(sort: Desc)])
+  @@map("tags")
+}
+
+// =================================
+// 3. レシピ管理
+// =================================
+
+enum Difficulty {
+  beginner
+  intermediate
+  advanced
+}
+
+enum RecipeStatus {
+  draft
+  published
+  archived
+}
+
+model Recipe {
+  id                   BigInt       @id @default(autoincrement())
+  title                String       @db.VarChar(200)
+  slug                 String       @unique @db.VarChar(250)
+  description          String       @db.Text
+  thumbnailUrl         String?      @map("thumbnail_url") @db.VarChar(500)
+  difficulty           Difficulty
+  estimatedTimeMinutes Int          @map("estimated_time_minutes")
+  categoryId           Int          @map("category_id")
+  authorId             BigInt       @map("author_id")
+  status               RecipeStatus @default(draft)
+  featured             Boolean      @default(false)
+  viewsCount           Int          @default(0) @map("views_count")
+  likesCount           Int          @default(0) @map("likes_count")
+  commentsCount        Int          @default(0) @map("comments_count")
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+  publishedAt          DateTime?    @map("published_at")
+
+  // Relations
+  category  Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author    User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  materials RecipeMaterial[]
+  tools     RecipeTool[]
+  steps     RecipeStep[]
+  tags      RecipeTag[]
+  likes     RecipeLike[]
+  comments  RecipeComment[]
+  views     RecipeView[]
+
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([difficulty])
+  @@index([featured])
+  @@index([likesCount(sort: Desc)])
+  @@index([viewsCount(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("recipes")
+}
+
+model RecipeMaterial {
+  id        BigInt  @id @default(autoincrement())
+  recipeId  BigInt  @map("recipe_id")
+  name      String  @db.VarChar(200)
+  quantity  String? @db.VarChar(100)
+  notes     String? @db.Text
+  sortOrder Int     @default(0) @map("sort_order")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([sortOrder])
+  @@map("recipe_materials")
+}
+
+model RecipeTool {
+  id          BigInt  @id @default(autoincrement())
+  recipeId    BigInt  @map("recipe_id")
+  name        String  @db.VarChar(200)
+  isEssential Boolean @default(true) @map("is_essential")
+  notes       String? @db.Text
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([sortOrder])
+  @@map("recipe_tools")
+}
+
+model RecipeStep {
+  id                   BigInt  @id @default(autoincrement())
+  recipeId             BigInt  @map("recipe_id")
+  stepNumber           Int     @map("step_number")
+  title                String  @db.VarChar(200)
+  description          String  @db.Text
+  imageUrl             String? @map("image_url") @db.VarChar(500)
+  tip                  String? @db.Text
+  estimatedTimeMinutes Int?    @map("estimated_time_minutes")
+  sortOrder            Int     @default(0) @map("sort_order")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, stepNumber], name: "unique_recipe_step")
+  @@index([recipeId])
+  @@index([stepNumber])
+  @@map("recipe_steps")
+}
+
+model RecipeTag {
+  recipeId  BigInt   @map("recipe_id")
+  tagId     Int      @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+  @@index([tagId])
+  @@map("recipe_tags")
+}
+
+// =================================
+// 4. インタラクション管理
+// =================================
+
+model RecipeLike {
+  id        BigInt   @id @default(autoincrement())
+  recipeId  BigInt   @map("recipe_id")
+  userId    BigInt   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, userId], name: "unique_recipe_user_like")
+  @@index([recipeId])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("recipe_likes")
+}
+
+model RecipeComment {
+  id              BigInt   @id @default(autoincrement())
+  recipeId        BigInt   @map("recipe_id")
+  userId          BigInt   @map("user_id")
+  parentCommentId BigInt?  @map("parent_comment_id")
+  content         String   @db.Text
+  likesCount      Int      @default(0) @map("likes_count")
+  isDeleted       Boolean  @default(false) @map("is_deleted")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  recipe        Recipe         @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentComment RecipeComment? @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       RecipeComment[] @relation("CommentReplies")
+  likes         CommentLike[]
+
+  @@index([recipeId])
+  @@index([userId])
+  @@index([parentCommentId])
+  @@index([createdAt(sort: Desc)])
+  @@map("recipe_comments")
+}
+
+model CommentLike {
+  id        BigInt   @id @default(autoincrement())
+  commentId BigInt   @map("comment_id")
+  userId    BigInt   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  comment RecipeComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId], name: "unique_comment_user_like")
+  @@index([commentId])
+  @@index([userId])
+  @@map("comment_likes")
+}
+
+// =================================
+// 5. 統計・分析
+// =================================
+
+model RecipeView {
+  id        BigInt   @id @default(autoincrement())
+  recipeId  BigInt   @map("recipe_id")
+  userId    BigInt?  @map("user_id")
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.Text
+  referrer  String?  @db.VarChar(500)
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@index([recipeId])
+  @@index([userId])
+  @@index([viewedAt])
+  @@index([ipAddress])
+  @@map("recipe_views")
+}
+
+model DailyStat {
+  id            BigInt   @id @default(autoincrement())
+  date          DateTime @unique @db.Date
+  totalRecipes  Int      @default(0) @map("total_recipes")
+  totalUsers    Int      @default(0) @map("total_users")
+  totalViews    Int      @default(0) @map("total_views")
+  totalLikes    Int      @default(0) @map("total_likes")
+  totalComments Int      @default(0) @map("total_comments")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([date(sort: Desc)])
+  @@map("daily_stats")
+} 

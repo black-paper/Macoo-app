@@ -1,0 +1,150 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: makeoo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_2025
+      MYSQL_DATABASE: makeoo_db
+      MYSQL_USER: makeoo_user
+      MYSQL_PASSWORD: makeoo_password_2025
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../mysql/mysql.conf:/etc/mysql/conf.d/custom.cnf:ro
+    networks:
+      - makeoo_network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-proot_password_2025",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: makeoo_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: makeoo_user
+      PMA_PASSWORD: makeoo_password_2025
+      MYSQL_ROOT_PASSWORD: root_password_2025
+      PMA_ARBITRARY: 1
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - makeoo_network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7.2-alpine
+    container_name: makeoo_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ../redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - makeoo_network
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Backend API (will be built later)
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: makeoo_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://makeoo_user:makeoo_password_2025@mysql:3306/makeoo_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: jwt_secret_key_2025_makeoo_platform
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../../backend:/app
+      - /app/node_modules
+      - backend_uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - makeoo_network
+    develop:
+      watch:
+        - action: sync
+          path: ../../backend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ../../backend/package*.json
+
+  # Nginx Reverse Proxy (for production)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: makeoo_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../ssl:/etc/nginx/ssl:ro
+      - frontend_dist:/usr/share/nginx/html:ro
+      - backend_uploads:/usr/share/nginx/uploads:ro
+    depends_on:
+      - backend
+    networks:
+      - makeoo_network
+    profiles:
+      - production
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  frontend_dist:
+    driver: local
+
+networks:
+  makeoo_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

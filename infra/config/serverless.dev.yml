@@ -1,0 +1,23 @@
+# 開発環境専用設定
+# serverless.ymlの設定を上書き・拡張します
+
+# 開発環境では最小限のリソース構成でコストを抑制
+custom:
+  cloudfrontConfig:
+    dev:
+      PriceClass: PriceClass_100 # 北米・ヨーロッパのみ（最も安価）
+      TTL: 300 # 5分（開発中はキャッシュを短く）
+
+# 開発環境では一部のCloudFront機能を簡素化
+resources:
+  Resources:
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          # 開発環境では圧縮を無効化してデバッグしやすく
+          DefaultCacheBehavior:
+            Compress: false
+            DefaultTTL: 300
+            MaxTTL: 300
+            MinTTL: 0

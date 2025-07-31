@@ -1,398 +1,411 @@
-import React, { useEffect, useState, type JSX } from "react";
+import {
+  AccessTime as AccessTimeIcon,
+  FilterList as FilterListIcon,
+  Refresh as RefreshIcon,
+  ThumbUp as ThumbUpIcon,
+  Visibility as VisibilityIcon,
+} from "@mui/icons-material";
+import {
+  Alert,
+  AlertTitle,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  CircularProgress,
+  Container,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Paper,
+  Select,
+  Typography,
+  alpha,
+  useTheme,
+} from "@mui/material";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useRecipes } from "../hooks";
+import { type Recipe } from "../services/api";
+import {
+  formatTime,
+  getBgColor,
+  getDifficultyLabel,
+  getRecipeIcon,
+  setPageTitle,
+} from "../utils";
 
 const Recipes: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const theme = useTheme();
+  const {
+    recipes,
+    categories,
+    loading,
+    error,
+    pagination,
+    selectedCategory,
+    selectedLevel,
+    setSelectedCategory,
+    setSelectedLevel,
+    retryFetch,
+  } = useRecipes();
 
   useEffect(() => {
-    document.title = "レシピ一覧 - Makeoo";
+    setPageTitle("レシピ一覧");
   }, []);
 
-  // サンプルレシピデータ
-  const recipes = [
-    {
-      id: 1,
-      title: "ペットボトルプランター",
-      description:
-        "使い終わったペットボトルを活用した環境に優しいプランターの作り方。初心者でも簡単に作れて、お家で野菜やハーブを育てることができます。",
-      image: "planter",
-      likes: 124,
-      level: "初級",
-      category: "ガーデニング",
-      author: "山田太郎",
-      time: "30分",
-      difficulty: "beginner",
-    },
-    {
-      id: 2,
-      title: "古着リメイクバッグ",
-      description:
-        "着なくなった古着を使ったエコバッグの作り方とデザインアイデア。お気に入りの服を新しい形で生まれ変わらせましょう。",
-      image: "bag",
-      likes: 89,
-      level: "中級",
-      category: "衣類・アクセサリー",
-      author: "佐藤花子",
-      time: "90分",
-      difficulty: "intermediate",
-    },
-    {
-      id: 3,
-      title: "廃材ウッドシェルフ",
-      description:
-        "廃材を使ったシンプルでおしゃれな壁掛けシェルフの制作方法。工具の使い方も詳しく説明しています。",
-      image: "shelf",
-      likes: 156,
-      level: "上級",
-      category: "家具・インテリア",
-      author: "田中和也",
-      time: "180分",
-      difficulty: "advanced",
-    },
-    {
-      id: 4,
-      title: "カーペット端材でコースター",
-      description:
-        "カーペットの端材を使った可愛いコースターの作り方。短時間で作れるのでプレゼントにもおすすめです。",
-      image: "coaster",
-      likes: 67,
-      level: "初級",
-      category: "家具・インテリア",
-      author: "鈴木みか",
-      time: "45分",
-      difficulty: "beginner",
-    },
-    {
-      id: 5,
-      title: "段ボール収納ボックス",
-      description:
-        "段ボールをおしゃれに変身させる収納ボックスのDIY。子供と一緒に作れる楽しいプロジェクトです。",
-      image: "storage",
-      likes: 203,
-      level: "中級",
-      category: "収納・整理",
-      author: "高橋一郎",
-      time: "120分",
-      difficulty: "intermediate",
-    },
-    {
-      id: 6,
-      title: "ワイン瓶キャンドルホルダー",
-      description:
-        "ワインボトルを再利用したおしゃれなキャンドルホルダー。ロマンチックな雰囲気作りにぴったりです。",
-      image: "candle",
-      likes: 91,
-      level: "中級",
-      category: "ライト・照明",
-      author: "中村さくら",
-      time: "60分",
-      difficulty: "intermediate",
-    },
+  const difficultyOptions = [
+    { value: "all", label: "すべての難易度" },
+    { value: "beginner", label: "初級" },
+    { value: "intermediate", label: "中級" },
+    { value: "advanced", label: "上級" },
   ];
 
-  const categories = [
-    "all",
-    "ガーデニング",
-    "衣類・アクセサリー",
-    "家具・インテリア",
-    "収納・整理",
-    "ライト・照明",
-  ];
-
-  const filteredRecipes = recipes.filter((recipe) => {
-    const categoryMatch =
-      selectedCategory === "all" || recipe.category === selectedCategory;
-    const levelMatch =
-      selectedLevel === "all" || recipe.difficulty === selectedLevel;
-    return categoryMatch && levelMatch;
-  });
-
-  const getRecipeIcon = (image: string) => {
-    const iconMap: { [key: string]: JSX.Element } = {
-      planter: (
-        <svg
-          className="w-10 h-10 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-          />
-        </svg>
-      ),
-      bag: (
-        <svg
-          className="w-10 h-10 text-blue-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-          />
-        </svg>
-      ),
-      shelf: (
-        <svg
-          className="w-10 h-10 text-orange-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-      ),
-      coaster: (
-        <svg
-          className="w-10 h-10 text-purple-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-          />
-        </svg>
-      ),
-      storage: (
-        <svg
-          className="w-10 h-10 text-gray-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
-      ),
-      candle: (
-        <svg
-          className="w-10 h-10 text-yellow-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 1-4 4-4s4 2 4 4c2-1 2.657-2.657 2.657-2.657a8 8 0 01-2 11.314z"
-          />
-        </svg>
-      ),
-    };
-    return iconMap[image] || iconMap.planter;
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "beginner":
+        return "success";
+      case "intermediate":
+        return "warning";
+      case "advanced":
+        return "error";
+      default:
+        return "default";
+    }
   };
 
-  const getBgColor = (image: string) => {
-    const colorMap: { [key: string]: string } = {
-      planter: "from-green-200 to-green-300",
-      bag: "from-blue-200 to-blue-300",
-      shelf: "from-orange-200 to-orange-300",
-      coaster: "from-purple-200 to-purple-300",
-      storage: "from-gray-200 to-gray-300",
-      candle: "from-yellow-200 to-yellow-300",
-    };
-    return colorMap[image] || colorMap.planter;
-  };
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, textAlign: "center" }}>
+        <CircularProgress size={60} sx={{ mb: 2 }} />
+        <Typography variant="h6" color="text.secondary">
+          レシピを読み込んでいます...
+        </Typography>
+      </Container>
+    );
+  }
 
-  const getLevelColor = (level: string) => {
-    const levelColors: { [key: string]: string } = {
-      初級: "text-primary-600 bg-primary-50",
-      中級: "text-blue-600 bg-blue-50",
-      上級: "text-orange-600 bg-orange-50",
-    };
-    return levelColors[level] || levelColors["初級"];
-  };
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Alert
+          severity="error"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={retryFetch}
+              startIcon={<RefreshIcon />}
+            >
+              再試行
+            </Button>
+          }
+        >
+          <AlertTitle>エラーが発生しました</AlertTitle>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
-    <div className="page-content bg-gray-50 min-h-screen">
-      <div className="container-custom section-padding-small">
-        {/* ヘッダー */}
-        <div className="text-center mb-16 fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            DIYレシピ一覧
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto">
-            環境に優しいDIYレシピを探してみましょう
-          </p>
-        </div>
+    <Box>
+      {/* ヘッダーセクション */}
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${alpha(theme.palette.primary.main, 0.1)} 100%)`,
+          py: { xs: 6, md: 8 },
+          textAlign: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography variant="h2" sx={{ mb: 3, fontWeight: 700 }}>
+            レシピ一覧
+          </Typography>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ maxWidth: 600, mx: "auto", lineHeight: 1.8 }}
+          >
+            環境に優しいDIYレシピをカテゴリや難易度から探してみましょう。
+            あなたの創造力を刺激する素敵なアイデアがきっと見つかります。
+          </Typography>
+        </Container>
+      </Box>
 
+      {/* フィルターとコンテンツセクション */}
+      <Container maxWidth="xl" sx={{ py: 6 }}>
         {/* フィルター */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-12 slide-up">
-          <div className="grid md:grid-cols-2 gap-8">
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            mb: 6,
+            backgroundColor: "grey.50",
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+            <FilterListIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              フィルター
+            </Typography>
+          </Box>
+          <Grid container spacing={3} sx={{ width: "100%" }}>
             {/* カテゴリフィルター */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">
-                カテゴリ
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="input-field text-lg"
-              >
-                <option value="all">すべて</option>
-                {categories.slice(1).map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl fullWidth>
+                <InputLabel>カテゴリで絞り込み</InputLabel>
+                <Select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  label="カテゴリで絞り込み"
+                >
+                  <MenuItem value="all">すべてのカテゴリ</MenuItem>
+                  {Array.isArray(categories) &&
+                    categories.map((category) => (
+                      <MenuItem key={category.id} value={category.slug}>
+                        {getRecipeIcon(category.iconName)} {category.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-            {/* レベルフィルター */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">
-                難易度
-              </label>
-              <select
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-                className="input-field text-lg"
-              >
-                <option value="all">すべて</option>
-                <option value="beginner">初級</option>
-                <option value="intermediate">中級</option>
-                <option value="advanced">上級</option>
-              </select>
-            </div>
-          </div>
-        </div>
+            {/* 難易度フィルター */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl fullWidth>
+                <InputLabel>難易度で絞り込み</InputLabel>
+                <Select
+                  value={selectedLevel}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
+                  label="難易度で絞り込み"
+                >
+                  {difficultyOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Paper>
 
         {/* レシピ一覧 */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
-          {filteredRecipes.map((recipe, index) => (
-            <Link
-              key={recipe.id}
-              to={`/recipe/${recipe.id}`}
-              className={`card hover:shadow-xl transition-all duration-500 zoom-in no-underline group ${
-                index % 3 === 1
-                  ? "fade-in-delay-1"
-                  : index % 3 === 2
-                  ? "fade-in-delay-2"
-                  : ""
-              }`}
-            >
-              <div
-                className={`h-56 bg-gradient-to-br ${getBgColor(
-                  recipe.image
-                )} rounded-lg mb-6 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500`}
+        <Grid container spacing={4} sx={{ width: "100%" }}>
+          {recipes.map((recipe: Recipe) => (
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={recipe.id}>
+              <Card
+                component={Link}
+                to={`/recipes/${recipe.slug}`}
+                sx={{
+                  height: "100%",
+                  textDecoration: "none",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: theme.shadows[8],
+                  },
+                }}
               >
-                <div className="text-gray-600 text-center">
-                  <div className="w-20 h-20 bg-white bg-opacity-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {getRecipeIcon(recipe.image)}
-                  </div>
-                  <span className="text-base font-medium">
-                    {recipe.title.split(/[・をで]/)[0]}
-                  </span>
-                </div>
-              </div>
-
-              <h4 className="text-xl font-semibold mb-4 text-gray-900">
-                {recipe.title}
-              </h4>
-              <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed">
-                {recipe.description}
-              </p>
-
-              <div className="flex items-center justify-between mb-4 text-base">
-                <span className="flex items-center text-gray-500">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  {recipe.author}
-                </span>
-                <span className="flex items-center text-gray-500">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  {recipe.time}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-gray-500 hover:text-red-500 transition-colors cursor-pointer">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {recipe.likes}
-                </span>
-                <span
-                  className={`text-base font-medium px-4 py-2 rounded-lg ${getLevelColor(
-                    recipe.level
-                  )}`}
+                {/* レシピ画像 */}
+                <CardMedia
+                  sx={{
+                    height: 200,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.secondary.light})`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                  }}
                 >
-                  {recipe.level}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+                  <Box
+                    sx={{
+                      fontSize: 60,
+                      color: "white",
+                      textAlign: "center",
+                    }}
+                  >
+                    {getRecipeIcon(recipe.category?.iconName)}
+                  </Box>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 12,
+                      right: 12,
+                    }}
+                  >
+                    <Chip
+                      label={getDifficultyLabel(recipe.difficulty)}
+                      color={
+                        getDifficultyColor(recipe.difficulty) as
+                          | "success"
+                          | "warning"
+                          | "error"
+                          | "default"
+                      }
+                      size="small"
+                      sx={{ color: "white", fontWeight: 600 }}
+                    />
+                  </Box>
+                </CardMedia>
 
-        {/* CTAセクション */}
-        <div className="text-center fade-in">
-          <div className="bg-white rounded-xl shadow-lg p-12">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              あなたのレシピを投稿しませんか？
-            </h3>
-            <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-2xl mx-auto">
-              素敵なDIYアイデアをコミュニティと共有して、みんなでエコフレンドリーな暮らしを広めましょう
-            </p>
-            <button className="btn-primary text-lg px-10 py-4">
-              レシピを投稿する
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+                <CardContent sx={{ p: 3 }}>
+                  {/* カテゴリとタグ */}
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <Chip
+                      label={recipe.category?.name}
+                      size="small"
+                      sx={{
+                        backgroundColor: getBgColor(recipe.category?.colorCode),
+                        color: "white",
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Box>
+
+                  {/* タイトルと説明 */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 600,
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
+                    {recipe.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mb: 3,
+                      lineHeight: 1.6,
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
+                    {recipe.description}
+                  </Typography>
+
+                  {/* メタ情報 */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mb: 2,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <AccessTimeIcon
+                        sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {formatTime(recipe.estimatedTimeMinutes)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <ThumbUpIcon
+                          sx={{
+                            fontSize: 16,
+                            mr: 0.5,
+                            color: "text.secondary",
+                          }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {recipe.likesCount}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <VisibilityIcon
+                          sx={{
+                            fontSize: 16,
+                            mr: 0.5,
+                            color: "text.secondary",
+                          }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {recipe.viewsCount}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* 作者情報 */}
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Avatar
+                      sx={{ width: 24, height: 24, mr: 1, fontSize: "0.8rem" }}
+                    >
+                      {recipe.author?.displayName?.charAt(0)}
+                    </Avatar>
+                    <Typography variant="body2" color="text.secondary">
+                      {recipe.author?.displayName}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* レシピが見つからない場合 */}
+        {recipes.length === 0 && (
+          <Paper
+            sx={{
+              p: 8,
+              textAlign: "center",
+              backgroundColor: "grey.50",
+              borderRadius: 3,
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+              レシピが見つかりませんでした
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              検索条件を変更して再度お試しください。
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setSelectedCategory("all");
+                setSelectedLevel("all");
+              }}
+            >
+              フィルターをリセット
+            </Button>
+          </Paper>
+        )}
+
+        {/* ページネーション */}
+        {pagination?.totalPages && pagination.totalPages > 1 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+            <Pagination
+              count={pagination.totalPages}
+              page={pagination.currentPage}
+              color="primary"
+              size="large"
+              variant="outlined"
+              shape="rounded"
+            />
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 };
 

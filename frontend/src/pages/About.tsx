@@ -1,227 +1,421 @@
+import {
+  Park as EcoIcon,
+  Favorite as FavoriteIcon,
+  Lightbulb as LightbulbIcon,
+  Nature as NatureIcon,
+  People as PeopleIcon,
+  Public as PublicIcon,
+  Recycling as RecyclingIcon,
+  TrendingUp as TrendingUpIcon,
+} from "@mui/icons-material";
+import {
+  Avatar,
+  Box,
+  Card,
+  Container,
+  Paper,
+  Typography,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import React, { useEffect } from "react";
+import { setPageTitle } from "../utils";
 
 const About: React.FC = () => {
+  const theme = useTheme();
+
   useEffect(() => {
-    document.title = "Makeooとは - Makeoo";
+    setPageTitle("Makeooとは");
   }, []);
 
-  return (
-    <div className="page-content bg-gray-50 min-h-screen">
-      <div className="container-narrow section-padding">
-        {/* ヘッダー */}
-        <div className="text-center mb-24 fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-10">
-            Makeooとは
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            環境に優しいDIYレシピを通じて、持続可能な暮らしを提案するプラットフォームです
-          </p>
-        </div>
+  const features = [
+    {
+      icon: <EcoIcon />,
+      title: "環境に優しい",
+      description:
+        "廃材や不用品を活用したエコフレンドリーなDIYレシピを提案し、環境への負荷を削減します。",
+    },
+    {
+      icon: <LightbulbIcon />,
+      title: "創造性を刺激",
+      description:
+        "アイデアあふれるDIYプロジェクトで、あなたの創造力を最大限に引き出します。",
+    },
+    {
+      icon: <PeopleIcon />,
+      title: "コミュニティ",
+      description:
+        "同じ志を持つ仲間たちと交流し、お互いのアイデアを共有できるプラットフォームです。",
+    },
+  ];
 
-        {/* ミッション */}
-        <div className="bg-white rounded-xl shadow-lg p-16 mb-20 slide-up">
-          <div className="flex items-center mb-12">
-            <div className="w-20 h-20 bg-primary-100 rounded-lg flex items-center justify-center mr-8">
-              <svg
-                className="w-10 h-10 text-primary-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+  const values = [
+    {
+      icon: <RecyclingIcon />,
+      title: "持続可能性",
+      description: "資源を無駄にしない、循環型社会の実現を目指します。",
+    },
+    {
+      icon: <NatureIcon />,
+      title: "自然との調和",
+      description:
+        "自然環境を大切にし、地球に優しいライフスタイルを推進します。",
+    },
+    {
+      icon: <TrendingUpIcon />,
+      title: "継続的改善",
+      description:
+        "常により良いサービスを提供するため、継続的な改善を心がけています。",
+    },
+  ];
+
+  const stats = [
+    { number: "500+", label: "レシピ数", color: "primary" },
+    { number: "2,000+", label: "ユーザー数", color: "secondary" },
+    { number: "95%", label: "満足度", color: "success" },
+    { number: "10,000kg", label: "削減CO2", color: "warning" },
+  ];
+
+  return (
+    <Box>
+      {/* ヘッダーセクション */}
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${alpha(theme.palette.primary.main, 0.1)} 100%)`,
+          py: { xs: 8, md: 12 },
+          textAlign: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: { xs: "3rem", md: "4.5rem" },
+              fontWeight: 700,
+              mb: 4,
+              background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${theme.palette.primary.main})`,
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Makeooとは
+          </Typography>
+          <Typography
+            variant="h5"
+            color="text.secondary"
+            sx={{ maxWidth: 800, mx: "auto", lineHeight: 1.8 }}
+          >
+            環境に優しいDIYレシピを通じて、持続可能な暮らしを提案するプラットフォームです
+          </Typography>
+        </Container>
+      </Box>
+
+      {/* ミッションセクション */}
+      <Container maxWidth="lg" sx={{ py: 12 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 8,
+            borderRadius: 4,
+            backgroundColor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mb: 6,
+              flexWrap: "wrap",
+              gap: 4,
+            }}
+          >
+            <Avatar
+              sx={{
+                width: 80,
+                height: 80,
+                bgcolor: "primary.light",
+                color: "primary.main",
+              }}
+            >
+              <FavoriteIcon sx={{ fontSize: 40 }} />
+            </Avatar>
+            <Typography variant="h3" sx={{ fontWeight: 700 }}>
               私たちのミッション
-            </h2>
-          </div>
-          <p className="text-gray-700 text-xl md:text-2xl leading-relaxed">
+            </Typography>
+          </Box>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ lineHeight: 2, mb: 4 }}
+          >
             Makeooは「Make
             eco」、つまり「エコを作ろう」という想いから生まれました。
             日々の生活の中で出る廃材や不用品を、創造性豊かなDIYプロジェクトに変身させることで、
             環境への負荷を減らしながら、手作りの喜びを分かち合うことを目指しています。
-          </p>
-        </div>
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ lineHeight: 1.8 }}
+          >
+            私たちは、小さな行動が大きな変化を生み出すと信じています。
+            一人ひとりの創造性と環境への配慮が集まることで、より良い未来を築いていけるのです。
+          </Typography>
+        </Paper>
+      </Container>
 
-        {/* 価値観 */}
-        <div className="grid md:grid-cols-3 gap-16 mb-24">
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center zoom-in">
-            <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-10">
-              <svg
-                className="w-14 h-14 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      {/* 統計セクション */}
+      <Box sx={{ backgroundColor: "background.default", py: 8 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            sx={{ mb: 8, fontWeight: 700 }}
+          >
+            数字で見るMakeoo
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(2, 1fr)",
+                md: "repeat(4, 1fr)",
+              },
+              gap: 4,
+            }}
+          >
+            {stats.map((stat, index) => (
+              <Card
+                key={index}
+                sx={{
+                  textAlign: "center",
+                  p: 4,
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: theme.shadows[8],
+                  },
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-semibold mb-8 text-gray-900">
-              持続可能性
-            </h3>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              リサイクル・アップサイクルを通じて、資源を大切に使い続ける文化を育てます
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center zoom-in fade-in-delay-1">
-            <div className="w-28 h-28 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-10">
-              <svg
-                className="w-14 h-14 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-semibold mb-8 text-gray-900">
-              コミュニティ
-            </h3>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              DIY愛好者同士が知識とアイデアを共有し、お互いに学び合える場を提供します
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center zoom-in fade-in-delay-2">
-            <div className="w-28 h-28 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-10">
-              <svg
-                className="w-14 h-14 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-semibold mb-8 text-gray-900">
-              創造性
-            </h3>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              一人ひとりの創造力を大切にし、個性豊かなアイデアが生まれる環境を作ります
-            </p>
-          </div>
-        </div>
-
-        {/* チーム紹介 */}
-        <div className="bg-white rounded-xl shadow-lg p-16 mb-20 slide-up slide-up-delay-1">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-16 text-center">
-            私たちのチーム
-          </h2>
-          <div className="grid md:grid-cols-2 gap-16">
-            <div className="text-center">
-              <div className="w-36 h-36 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mx-auto mb-10 flex items-center justify-center">
-                <svg
-                  className="w-18 h-18 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2,
+                    color: `${stat.color}.main`,
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-semibold mb-8">開発チーム</h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                環境問題とテクノロジーに情熱を持つエンジニアたちが、
-                使いやすく美しいプラットフォームを開発しています
-              </p>
-            </div>
+                  {stat.number}
+                </Typography>
+                <Typography variant="h6" color="text.secondary">
+                  {stat.label}
+                </Typography>
+              </Card>
+            ))}
+          </Box>
+        </Container>
+      </Box>
 
-            <div className="text-center">
-              <div className="w-36 h-36 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full mx-auto mb-10 flex items-center justify-center">
-                <svg
-                  className="w-18 h-18 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+      {/* 特徴セクション */}
+      <Container maxWidth="lg" sx={{ py: 12 }}>
+        <Typography
+          variant="h3"
+          textAlign="center"
+          sx={{ mb: 8, fontWeight: 700 }}
+        >
+          Makeooの特徴
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 6,
+          }}
+        >
+          {features.map((feature, index) => (
+            <Card
+              key={index}
+              sx={{
+                height: "100%",
+                textAlign: "center",
+                p: 4,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-8px)",
+                  boxShadow: theme.shadows[8],
+                },
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: 80,
+                  height: 80,
+                  bgcolor: "primary.light",
+                  color: "primary.main",
+                  mx: "auto",
+                  mb: 3,
+                }}
+              >
+                {React.cloneElement(feature.icon, { sx: { fontSize: 40 } })}
+              </Avatar>
+              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                {feature.title}
+              </Typography>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ lineHeight: 1.8 }}
+              >
+                {feature.description}
+              </Typography>
+            </Card>
+          ))}
+        </Box>
+      </Container>
+
+      {/* 価値観セクション */}
+      <Box sx={{ backgroundColor: "background.default", py: 12 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            sx={{ mb: 8, fontWeight: 700 }}
+          >
+            私たちの価値観
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 6,
+            }}
+          >
+            {values.map((value, index) => (
+              <Paper
+                key={index}
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: "100%",
+                  textAlign: "center",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 3,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "primary.light",
+                    borderColor: "primary.main",
+                  },
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    bgcolor: "secondary.light",
+                    color: "secondary.main",
+                    mx: "auto",
+                    mb: 3,
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-semibold mb-8">DIYアドバイザー</h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                経験豊富なDIY職人やデザイナーが、
-                安全で実用的なレシピの監修とコミュニティサポートを行っています
-              </p>
-            </div>
-          </div>
-        </div>
+                  {React.cloneElement(value.icon, { sx: { fontSize: 32 } })}
+                </Avatar>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                  {value.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.6 }}
+                >
+                  {value.description}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+        </Container>
+      </Box>
 
-        {/* 統計情報 */}
-        <div className="bg-primary-600 rounded-xl shadow-lg p-16 mb-20 text-white slide-up slide-up-delay-2">
-          <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center">
-            Makeooの実績
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-            <div>
-              <div className="text-4xl md:text-5xl font-bold mb-6">2,450+</div>
-              <div className="text-primary-100 text-lg">投稿レシピ数</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold mb-6">12,000+</div>
-              <div className="text-primary-100 text-lg">登録ユーザー数</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold mb-6">85,000+</div>
-              <div className="text-primary-100 text-lg">月間閲覧数</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold mb-6">340kg</div>
-              <div className="text-primary-100 text-lg">削減廃棄物量</div>
-            </div>
-          </div>
-        </div>
+      {/* ビジョンセクション */}
+      <Container maxWidth="lg" sx={{ py: 12 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 8,
+            borderRadius: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.secondary.light})`,
+            textAlign: "center",
+            color: "white",
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: "white",
+              color: "primary.main",
+              mx: "auto",
+              mb: 4,
+            }}
+          >
+            <PublicIcon sx={{ fontSize: 50 }} />
+          </Avatar>
+          <Typography variant="h3" sx={{ mb: 4, fontWeight: 700 }}>
+            未来への想い
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ maxWidth: 800, mx: "auto", lineHeight: 2, opacity: 0.95 }}
+          >
+            私たちは、Makeooを通じて世界中の人々が環境に配慮したライフスタイルを送り、
+            創造性を発揮できる社会を実現したいと考えています。
+            一つひとつのDIYプロジェクトが、地球の未来を明るくする力になると信じています。
+          </Typography>
+        </Paper>
+      </Container>
 
-        {/* お問い合わせ */}
-        <div className="bg-white rounded-xl shadow-lg p-16 text-center fade-in">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10">
-            一緒にエコな未来を作りませんか？
-          </h2>
-          <p className="text-gray-600 text-lg mb-16 leading-relaxed max-w-2xl mx-auto">
-            ご質問、ご提案、パートナーシップに関するお問い合わせなど、
-            お気軽にご連絡ください
-          </p>
-          <div className="flex flex-col sm:flex-row gap-8 justify-center">
-            <button className="btn-primary text-lg px-12 py-4">
-              お問い合わせ
-            </button>
-            <button className="btn-secondary text-lg px-12 py-4">
-              コミュニティに参加
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* チームセクション */}
+      <Box sx={{ backgroundColor: "background.default", py: 12 }}>
+        <Container maxWidth="md">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            sx={{ mb: 8, fontWeight: 700 }}
+          >
+            一緒に作りましょう
+          </Typography>
+          <Card sx={{ p: 6, textAlign: "center" }}>
+            <Typography variant="h5" sx={{ mb: 4, fontWeight: 600 }}>
+              あなたも参加しませんか？
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ lineHeight: 1.8, mb: 4 }}
+            >
+              Makeooは、環境に優しいDIYを愛するすべての人々に開かれたプラットフォームです。
+              あなたのアイデアや経験を共有して、一緒により良い世界を作りましょう。
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: 500, color: "primary.main" }}
+            >
+              持続可能な未来は、一人ひとりの小さな行動から始まります。
+            </Typography>
+          </Card>
+        </Container>
+      </Box>
+    </Box>
   );
 };
 

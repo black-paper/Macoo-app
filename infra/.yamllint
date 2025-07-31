@@ -1,0 +1,36 @@
+---
+extends: default
+
+yaml-files:
+  - "*.yaml"
+  - "*.yml"
+  - ".yamllint"
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+
+  # CloudFormation intrinsic functions are allowed
+  truthy:
+    allowed-values: ["true", "false", "on", "off", "yes", "no"]
+    check-keys: false
+
+  # Allow CloudFormation tags like !Ref, !Sub, !GetAtt
+  document-start: disable
+
+  # Disable specific rules that conflict with serverless.yml
+  comments:
+    min-spaces-from-content: 1
+
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+ignore: |
+  # Ignore linting for lines with CloudFormation intrinsic functions
+  .*!Ref.*
+  .*!Sub.*
+  .*!GetAtt.*
+  .*!Join.*

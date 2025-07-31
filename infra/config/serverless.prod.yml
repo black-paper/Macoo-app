@@ -1,0 +1,39 @@
+# 本番環境専用設定
+# serverless.ymlの設定を上書き・拡張します
+
+# 本番環境では性能とキャッシュ効率を重視
+custom:
+  cloudfrontConfig:
+    prod:
+      PriceClass: PriceClass_100 # コストを抑えつつ基本的なパフォーマンスを確保
+      TTL: 31536000 # 1年（積極的なキャッシュ）
+
+# 本番環境では追加のセキュリティヘッダーを設定
+resources:
+  Resources:
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          # 本番環境では圧縮とGzipを有効化
+          DefaultCacheBehavior:
+            Compress: true
+            DefaultTTL: 31536000
+            MaxTTL: 31536000
+            MinTTL: 0
+            # セキュリティヘッダーの追加
+            ResponseHeadersPolicy:
+              ResponseHeadersPolicyConfig:
+                Name: ${self:service}-${self:provider.stage}-security-headers
+                SecurityHeadersConfig:
+                  StrictTransportSecurity:
+                    AccessControlMaxAgeSec: 31536000
+                    IncludeSubdomains: true
+                  ContentTypeOptions:
+                    Override: true
+                  FrameOptions:
+                    FrameOption: DENY
+                    Override: true
+                  ReferrerPolicy:
+                    ReferrerPolicy: strict-origin-when-cross-origin
+                    Override: true

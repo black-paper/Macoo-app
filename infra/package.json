@@ -1,0 +1,36 @@
+{
+  "name": "makeoo-infra",
+  "version": "1.0.0",
+  "description": "AWS Infrastructure for Makeoo DIY Platform",
+  "main": "serverless.yml",
+  "scripts": {
+    "deploy": "export AWS_PROFILE=shota && npm run build:frontend && sls deploy --verbose",
+    "deploy:dev": "export AWS_PROFILE=shota && npm run build:frontend && sls deploy --stage dev --verbose",
+    "deploy:prod": "export AWS_PROFILE=shota && npm run build:frontend && sls deploy --stage prod --verbose",
+    "remove": "export AWS_PROFILE=shota && sls remove --verbose",
+    "remove:dev": "export AWS_PROFILE=shota && sls remove --stage dev --verbose",
+    "remove:prod": "export AWS_PROFILE=shota && sls remove --stage prod --verbose",
+    "build:frontend": "cd ../frontend && npm run build",
+    "info": "export AWS_PROFILE=shota && sls info --verbose",
+    "logs": "export AWS_PROFILE=shota && sls logs --function main --tail",
+    "sync": "export AWS_PROFILE=shota && sls s3sync",
+    "invalidate": "export AWS_PROFILE=shota && sls cloudfrontInvalidate"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "s3",
+    "cloudfront",
+    "static-hosting"
+  ],
+  "author": "Makeoo Team",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-s3-sync": "^3.2.0",
+    "serverless-cloudfront-invalidate": "^1.12.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

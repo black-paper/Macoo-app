@@ -1,158 +1,120 @@
 #!/bin/bash
 
-# Makeoo 開発サーバー起動スクリプト
-# バックエンド（FastAPI）とフロントエンド（Vite）を並行起動
+# 🚀 Makeoo 開発サーバー起動スクリプト
+# Usage: ./scripts/dev-start.sh [option]
+#
+# Options:
+#   full    - 全サービス起動（デフォルト）
+#   db      - データベースのみ起動
+#   app     - アプリケーションのみ起動
+#   reset   - データベースリセット + 全サービス起動
 
-set -e  # エラー時に停止
+set -e
 
-echo "🚀 Makeoo 開発サーバーを起動します..."
+# カラー出力用関数
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-# 環境変数の読み込み
-if [ -f "/workspace/.env" ]; then
-    export $(cat /workspace/.env | grep -v '^#' | xargs)
-    echo "✅ 環境変数を読み込みました"
-else
-    echo "⚠️  .env ファイルが見つかりません。.env.example をコピーして作成してください"
-    exit 1
-fi
-
-# 依存関係の確認とインストール
-echo "📦 依存関係を確認中..."
-
-# Backend依存関係
-if [ -f "/workspace/backend/requirements.txt" ]; then
-    cd /workspace/backend
-    echo "🐍 Python依存関係をインストール中..."
-    pip install -r requirements.txt
-    cd /workspace
-fi
-
-# Frontend依存関係  
-if [ -f "/workspace/frontend/package.json" ]; then
-    cd /workspace/frontend
-    echo "📦 Node.js依存関係をインストール中..."
-    npm install
-    cd /workspace
-fi
-
-# データベース接続テスト
-echo "🗄️  データベース接続をテスト中..."
-until mysql -h mysql -u dev -pdevpassword -e "SELECT 1" > /dev/null 2>&1; do
-  echo "MySQL接続を待機中..."
-  sleep 2
-done
-echo "✅ データベース接続OK"
-
-# ログディレクトリの作成
-mkdir -p /workspace/logs
-
-# PIDファイルのクリーンアップ
-cleanup() {
-    echo ""
-    echo "🛑 開発サーバーを停止中..."
-    if [ -f "/workspace/logs/backend.pid" ]; then
-        kill $(cat /workspace/logs/backend.pid) 2>/dev/null || true
-        rm -f /workspace/logs/backend.pid
-    fi
-    if [ -f "/workspace/logs/frontend.pid" ]; then
-        kill $(cat /workspace/logs/frontend.pid) 2>/dev/null || true
-        rm -f /workspace/logs/frontend.pid
-    fi
-    echo "👋 開発サーバーを停止しました"
-    exit 0
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
-# Ctrl+C時のクリーンアップ
-trap cleanup INT TERM
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
 
-echo ""
-echo "🎯 サーバー起動中..."
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
 
-# バックエンドサーバー起動（FastAPI）
-if [ -f "/workspace/backend/handlers/app.py" ]; then
-    cd /workspace/backend
-    echo "🐍 FastAPI サーバーを起動中... (http://localhost:8000)"
-    nohup uvicorn handlers.app:app --reload --host 0.0.0.0 --port 8000 \
-        > /workspace/logs/backend.log 2>&1 &
-    echo $! > /workspace/logs/backend.pid
-    cd /workspace
-else
-    echo "⚠️  backend/handlers/app.py が見つかりません。バックエンドの初期実装を作成してください"
-fi
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
 
-# 少し待機
-sleep 2
+# 引数処理
+OPTION=${1:-full}
 
-# フロントエンドサーバー起動（Vite）
-if [ -f "/workspace/frontend/package.json" ]; then
-    cd /workspace/frontend
-    echo "⚛️  Vite開発サーバーを起動中... (http://localhost:3000)"
-    nohup npm run dev -- --host 0.0.0.0 --port 3000 \
-        > /workspace/logs/frontend.log 2>&1 &
-    echo $! > /workspace/logs/frontend.pid
-    cd /workspace
-else
-    echo "⚠️  frontend/package.json が見つかりません。フロントエンドの初期実装を作成してください"
-fi
+print_info "Makeoo 開発環境を起動しています（オプション: $OPTION）"
 
-echo ""
-echo "🌟 開発サーバーが起動しました！"
-echo ""
-echo "📊 アクセス情報:"
-echo "  🌐 フロントエンド: http://localhost:3000"
-echo "  🔧 バックエンドAPI: http://localhost:8000"
-echo "  📚 API ドキュメント: http://localhost:8000/docs"
-echo "  🗄️  データベース: mysql://localhost:3306/makeoo_dev"
-echo ""
-echo "📋 便利なコマンド:"
-echo "  📖 ログ確認:"
-echo "    - tail -f /workspace/logs/backend.log   # バックエンドログ"
-echo "    - tail -f /workspace/logs/frontend.log  # フロントエンドログ"
-echo "  🔧 開発ツール:"
-echo "    - mysql -h mysql -u dev -pdevpassword makeoo_dev  # DB接続"
-echo "    - pytest backend/tests/                           # テスト実行"
-echo ""
-echo "⚠️  注意: Ctrl+C で両方のサーバーを停止します"
-echo ""
-
-# サーバーの起動確認
-sleep 5
-
-# バックエンドヘルスチェック
-if curl -s http://localhost:8000/health > /dev/null 2>&1; then
-    echo "✅ バックエンド (FastAPI) が正常に起動しました"
-else
-    echo "⚠️  バックエンドの起動を確認できませんでした。ログを確認してください:"
-    echo "    tail -f /workspace/logs/backend.log"
-fi
-
-# フロントエンドヘルスチェック
-if curl -s http://localhost:3000 > /dev/null 2>&1; then
-    echo "✅ フロントエンド (Vite) が正常に起動しました"  
-else
-    echo "⚠️  フロントエンドの起動を確認できませんでした。ログを確認してください:"
-    echo "    tail -f /workspace/logs/frontend.log"
-fi
-
-echo ""
-echo "🚀 開発を開始してください！Ctrl+C で停止します。"
-
-# 無限ループでプロセス監視
-while true; do
-    sleep 30
+case $OPTION in
+    "db")
+        print_info "データベースサービスのみを起動しています..."
+        docker compose -f infra/docker/docker-compose.yml up -d mysql redis phpmyadmin adminer redis-commander
+        print_success "データベースサービスが起動しました"
+        echo ""
+        echo "📊 利用可能なサービス:"
+        echo "   • phpMyAdmin: http://localhost:8080"
+        echo "   • Adminer: http://localhost:8081"
+        echo "   • Redis Commander: http://localhost:8082"
+        ;;
     
-    # プロセスが生きているかチェック
-    if [ -f "/workspace/logs/backend.pid" ]; then
-        if ! kill -0 $(cat /workspace/logs/backend.pid) 2>/dev/null; then
-            echo "⚠️  バックエンドプロセスが停止しました"
-            rm -f /workspace/logs/backend.pid
-        fi
-    fi
+    "app")
+        print_info "アプリケーションのみを起動しています..."
+        echo "フロントエンド: http://localhost:5173"
+        echo "バックエンド: http://localhost:3001"
+        echo ""
+        npm run dev:backend &
+        npm run dev:frontend
+        ;;
     
-    if [ -f "/workspace/logs/frontend.pid" ]; then
-        if ! kill -0 $(cat /workspace/logs/frontend.pid) 2>/dev/null; then
-            echo "⚠️  フロントエンドプロセスが停止しました"  
-            rm -f /workspace/logs/frontend.pid
+    "reset")
+        print_warning "データベースをリセットしています..."
+        docker compose -f infra/docker/docker-compose.yml down -v
+        docker compose -f infra/docker/docker-compose.yml up -d mysql redis
+        
+        print_info "データベースの準備を待機しています..."
+        sleep 15
+        
+        cd backend
+        npx prisma db push --force-reset
+        npx prisma generate
+        npm run db:seed
+        cd ..
+        
+        print_success "データベースリセット完了"
+        
+        print_info "全サービスを起動しています..."
+        docker compose -f infra/docker/docker-compose.yml up -d phpmyadmin adminer redis-commander
+        npm run dev:backend &
+        npm run dev:frontend
+        ;;
+    
+    "full"|*)
+        print_info "全サービスを起動しています..."
+        
+        # Dockerサービス起動
+        docker compose -f infra/docker/docker-compose.yml up -d mysql redis phpmyadmin adminer redis-commander
+        
+        print_info "データベースの準備を待機しています..."
+        sleep 10
+        
+        # 開発サーバー起動
+        print_success "開発サーバーを起動しています..."
+        echo ""
+        echo "📊 利用可能なサービス:"
+        echo "   • フロントエンド: http://localhost:5173"
+        echo "   • バックエンドAPI: http://localhost:3001"
+        echo "   • phpMyAdmin: http://localhost:8080"
+        echo "   • Adminer: http://localhost:8081"
+        echo "   • Redis Commander: http://localhost:8082"
+        echo ""
+        echo "🛑 終了するには Ctrl+C を押してください"
+        echo ""
+        
+        # concurrentlyがインストールされている場合は並行実行
+        if command -v npx >/dev/null 2>&1 && npm list concurrently >/dev/null 2>&1; then
+            npx concurrently \
+                --names "BACKEND,FRONTEND" \
+                --prefix-colors "blue,green" \
+                "npm run dev:backend" \
+                "npm run dev:frontend"
+        else
+            # concurrentlyがない場合は順次実行
+            npm run dev:backend &
+            npm run dev:frontend
         fi
-    fi
-done 
+        ;;
+esac 
